@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karding - Mobile Dashboard</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+    :root{
+      --primary:#2a2a72;
+      --secondary:#009ffd;
+      --accent:#ff0076;
+      --bg-dark:#121212;
+      --bg-light:#f2f2f2;
+      --text-light:#fff;
+      --text-dark:#111;
+      --income:#4CAF50;
+      --expense:#F44336;
+    }
+    body{
+      background:var(--bg-dark);
+      color:var(--text-light);
+      transition:0.5s;
+      overflow-x:hidden;
+    }
+    body.light{background:var(--bg-light);color:var(--text-dark);}
+    header{
+      padding:.7rem;
+      position:fixed;top:0;width:100%;
+      background:rgba(0,0,0,.8);backdrop-filter:blur(10px);
+      z-index:1000;
+    }
+    .nav{display:flex;justify-content:space-between;align-items:center;}
+    .logo{font-size:1.3rem;font-weight:bold;background:linear-gradient(45deg,var(--secondary),var(--accent));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .nav-links{display:flex;gap:1rem;}
+    .nav-links a{font-size:.9rem;text-decoration:none;color:inherit;}
+    .hero{
+      margin-top:3.5rem;
+      text-align:center;
+      padding:2rem 1rem;
+      background:linear-gradient(45deg,var(--primary),var(--secondary));
+      border-radius:0 0 20px 20px;
+    }
+    .hero h1{font-size:1.8rem;margin-bottom:.5rem;}
+    .hero p{font-size:.9rem;}
+    .cta{padding:.7rem 1.2rem;font-size:.9rem;border:none;
+      background:var(--accent);color:#fff;border-radius:20px;margin-top:1rem;}
+    /* Dashboard */
+    .dashboard{
+      margin:2rem 1rem;
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:1rem;
+    }
+    .card{
+      background:rgba(255,255,255,.08);
+      padding:1rem;border-radius:15px;
+      text-align:center;
+      font-size:.8rem;
+      transition:.3s;
+      opacity:0;transform:translateY(30px);
+    }
+    .card.show{opacity:1;transform:translateY(0);}
+    .card h3{font-size:1rem;margin-bottom:.3rem;}
+    .chart-container{padding:1rem;}
+    canvas{max-width:100%;height:200px;}
+    /* Historial */
+    .history{
+      margin:1rem;
+      background:rgba(255,255,255,.08);
+      border-radius:15px;
+      padding:1rem;
+      max-height:200px;
+      overflow-y:auto;
+    }
+    .history h3{font-size:1rem;margin-bottom:.5rem;text-align:center;}
+    .transaction{
+      display:flex;justify-content:space-between;
+      padding:.6rem;border-bottom:1px solid rgba(255,255,255,.2);
+      font-size:.85rem;
+      opacity:0;transform:translateX(-30px);
+      transition:.4s;
+    }
+    .transaction.show{opacity:1;transform:translateX(0);}
+    .transaction span{font-weight:bold;}
+    .transaction.income span{color:var(--income);}
+    .transaction.expense span{color:var(--expense);}
+    /* testimonios */
+    .testimonials{text-align:center;padding:2rem 1rem;}
+    .testimonial{display:none;font-size:.85rem;font-style:italic;}
+    .testimonial.active{display:block;animation:fadeIn 1s ease;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    footer{padding:1rem;text-align:center;font-size:.8rem;background:#000;color:#fff;}
+    footer span{color:var(--accent);}
+    .theme-toggle{
+      position:fixed;bottom:15px;right:15px;
+      width:45px;height:45px;border-radius:50%;
+      background:var(--secondary);color:#fff;
+      font-size:1.2rem;border:none;box-shadow:0 0 10px var(--secondary);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="nav">
+      <div class="logo">Karding</div>
+      <div class="nav-links">
+        <a href="#inicio">Inicio</a>
+        <a href="#dashboard">Dashboard</a>
+        <a href="#historial">Historial</a>
+        <a href="#testimonios">Testimonios</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero" id="inicio">
+    <h1 id="typed"></h1>
+    <p>Solución moderna para tus finanzas</p>
+    <button class="cta" onclick="showMessage()">Comenzar</button>
+  </section>
+
+  <section class="dashboard" id="dashboard">
+    <div class="card"><h3>Ingresos</h3><p>$12,300</p></div>
+    <div class="card"><h3>Gastos</h3><p>$8,450</p></div>
+    <div class="card"><h3>Ahorro</h3><p>$3,850</p></div>
+    <div class="card"><h3>Tarjetas</h3><p>4 activas</p></div>
+  </section>
+
+  <div class="chart-container">
+    <canvas id="financeChart"></canvas>
+  </div>
+
+  <section class="history" id="historial">
+    <h3>Historial de Transacciones</h3>
+    <div class="transaction income"><p>Pago recibido</p><span>+$500</span></div>
+    <div class="transaction expense"><p>Compra supermercado</p><span>-$120</span></div>
+    <div class="transaction expense"><p>Netflix</p><span>-$15</span></div>
+    <div class="transaction income"><p>Venta producto</p><span>+$200</span></div>
+    <div class="transaction expense"><p>Uber</p><span>-$30</span></div>
+    <div class="transaction income"><p>Bono trabajo</p><span>+$1000</span></div>
+  </section>
+
+  <section class="testimonials" id="testimonios">
+    <h2 style="font-size:1.2rem;margin-bottom:.8rem;">Opiniones</h2>
+    <p class="testimonial active">⭐ "Karding me ayuda a organizar mis finanzas."</p>
+    <p class="testimonial">💎 "El diseño móvil es perfecto para mi negocio."</p>
+    <p class="testimonial">🔐 "La seguridad me da confianza total."</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 <span>Karding</span>. Todos los derechos reservados.</p>
+  </footer>
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Typed animado
+    const textArray=["Bienvenido a Karding","Tu futuro financiero","Todo en tu celular"];
+    let i=0,j=0,typed=document.getElementById("typed");
+    function typing(){
+      if(j<textArray[i].length){
+        typed.textContent+=textArray[i][j];j++;
+        setTimeout(typing,100);
+      }else{setTimeout(erasing,1500);}
+    }
+    function erasing(){
+      if(j>0){
+        typed.textContent=textArray[i].substring(0,j-1);j--;
+        setTimeout(erasing,50);
+      }else{i=(i+1)%textArray.length;setTimeout(typing,200);}
+    }
+    typing();
+
+    // CTA mensaje
+    function showMessage(){
+      Swal.fire({title:"¡Bienvenido!",text:"Gracias por usar Karding",icon:"success"});
+    }
+
+    // Testimonios carrusel
+    const testimonials=document.querySelectorAll(".testimonial");let t=0;
+    setInterval(()=>{
+      testimonials[t].classList.remove("active");
+      t=(t+1)%testimonials.length;
+      testimonials[t].classList.add("active");
+    },3000);
+
+    // Gráfica
+    const ctx=document.getElementById("financeChart");
+    new Chart(ctx,{
+      type:"line",
+      data:{
+        labels:["Ene","Feb","Mar","Abr","May","Jun"],
+        datasets:[
+          {label:"Ingresos",data:[2000,2500,2200,3000,2800,3500],borderColor:"#009ffd",fill:false},
+          {label:"Gastos",data:[1500,1800,1700,2200,2100,2600],borderColor:"#ff0076",fill:false}
+        ]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{labels:{color:"white"}}},
+        scales:{x:{ticks:{color:"white"}},y:{ticks:{color:"white"}}}
+      }
+    });
+
+    // Animar cards y transacciones al hacer scroll
+    function animateOnScroll(){
+      document.querySelectorAll('.card,.transaction').forEach(el=>{
+        const rect=el.getBoundingClientRect();
+        if(rect.top<window.innerHeight-50){el.classList.add("show");}
+      });
+    }
+    window.addEventListener("scroll",animateOnScroll);
+    animateOnScroll();
+
+    // Cambiar tema
+    function toggleTheme(){document.body.classList.toggle("light");}
+  </script>
+</body>
+</html>
